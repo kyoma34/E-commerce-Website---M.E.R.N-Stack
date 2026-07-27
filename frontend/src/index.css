@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body { margin: 0;}
+
+
+
+/*auth page css*/
+.auth-page{
+    min-height: 100vh;
+    background-color: rgb(86, 1, 74);
+}
+
+.auth-container{
+    padding: 200px;
+    display: flex;
+    justify-content: center;
+    background-color: red;
+}
+.auth-right{
+    background-color: blue;
+}
+.auth-left{
+    background-color: green;
+}
