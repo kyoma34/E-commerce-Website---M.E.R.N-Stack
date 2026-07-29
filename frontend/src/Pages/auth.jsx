@@ -1,4 +1,8 @@
 import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
+
 
 /* ─── helpers ─────────────────────────────────────────── */
 const getStrength = (pwd) => {
@@ -29,9 +33,11 @@ function Field({ label, id, error, children }) {
 
 /* ─── main component ───────────────────────────────────── */
 export default function Auth() {
+  const navigate = useNavigate();
   const [mode, setMode]              = useState("login");
   const [showPwd, setShowPwd]        = useState(false);
   const [errors, setErrors]          = useState({});
+  const [authError, setAuthError] = useState("");
   const [form, setForm]              = useState({
     firstName: "", lastName: "", email: "", password: "", confirmPassword: "",
   });
@@ -58,15 +64,53 @@ export default function Auth() {
   };
 
   const submit = (e) => {
-    e.preventDefault();
-    const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); return; }
-    alert(mode === "login" ? "Signing in…" : "Creating account…");
-  };
+  e.preventDefault();
+  const errs = validate();
+  if (Object.keys(errs).length) {
+    setErrors(errs);
+    setAuthError("");
+    return;
+  }
+
+  if (mode === "register") {
+    axios.post('http://localhost:5001/register', {
+      firstName: form.firstName,
+      lastName: form.lastName,
+      email: form.email,
+      password: form.password,
+      confirmPassword: form.confirmPassword,
+    })
+      .then(result => {
+        console.log(result);
+        setAuthError("");
+        switchMode('login');
+      })
+      .catch(error => {
+        console.log(error);
+        const msg = error.response?.data?.message || "Something went wrong. Please try again.";
+        setAuthError(msg);
+      });
+  } else {
+    axios.post('http://localhost:5001/login', {
+      email: form.email,
+      password: form.password,
+    })
+      .then(result => {
+        console.log(result);
+        setAuthError("");
+        navigate('/');
+      })
+      .catch(error => {
+        console.log(error);
+        setAuthError("Invalid email or password. Please try again.");
+      });
+  }
+};
 
   const switchMode = (m) => {
     setMode(m);
     setErrors({});
+    setAuthError("");
     setForm({ firstName: "", lastName: "", email: "", password: "", confirmPassword: "" });
   };
 
@@ -164,6 +208,7 @@ export default function Auth() {
             <Field label="Email" id="email" error={errors.email}>
               <input className={inputCls("email")} id="email" name="email"
                 type="email" placeholder="you@example.com" value={form.email} onChange={change} />
+                {authError && <span className="text-xs text-[#E05C5C]">{authError}</span>}
             </Field>
 
             {/* password */}
