@@ -2,6 +2,9 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+import api from "../utils/api";           // ← replaces axios direct import
+import { useAuth } from "../context/AuthContext"; 
+
 
 
 /* ─── helpers ─────────────────────────────────────────── */
@@ -33,6 +36,9 @@ function Field({ label, id, error, children }) {
 
 /* ─── main component ───────────────────────────────────── */
 export default function Auth() {
+
+  const { login } = useAuth();
+
   const navigate = useNavigate();
   const [mode, setMode]              = useState("login");
   const [showPwd, setShowPwd]        = useState(false);
@@ -64,48 +70,46 @@ export default function Auth() {
   };
 
   const submit = (e) => {
-  e.preventDefault();
-  const errs = validate();
-  if (Object.keys(errs).length) {
-    setErrors(errs);
-    setAuthError("");
-    return;
-  }
-
-  if (mode === "register") {
-    axios.post('http://localhost:5001/register', {
-      firstName: form.firstName,
-      lastName: form.lastName,
-      email: form.email,
-      password: form.password,
-      confirmPassword: form.confirmPassword,
-    })
-      .then(result => {
-        console.log(result);
-        setAuthError("");
-        switchMode('login');
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      setAuthError("");
+      return;
+    }
+  
+    if (mode === "register") {
+      api.post("/api/auth/register", {
+        firstName: form.firstName,
+        lastName:  form.lastName,
+        email:     form.email,
+        password:  form.password,
       })
-      .catch(error => {
-        console.log(error);
-        const msg = error.response?.data?.message || "Something went wrong. Please try again.";
-        setAuthError(msg);
-      });
-  } else {
-    axios.post('http://localhost:5001/login', {
-      email: form.email,
-      password: form.password,
-    })
-      .then(result => {
-        console.log(result);
-        setAuthError("");
-        navigate('/');
+        .then(() => {
+          setAuthError("");
+          switchMode("login");
+        })
+        .catch((error) => {
+          const msg = error.response?.data?.message || "Something went wrong.";
+          setAuthError(msg);
+        });
+  
+    } else {
+      api.post("/api/auth/login", {
+        email:    form.email,
+        password: form.password,
       })
-      .catch(error => {
-        console.log(error);
-        setAuthError("Invalid email or password. Please try again.");
-      });
-  }
-};
+        .then((result) => {
+          const { token, ...userData } = result.data;
+          login(userData, token);           // ← saves to context + localStorage
+          setAuthError("");
+          navigate(userData.isAdmin ? "/admin" : "/");
+        })
+        .catch(() => {
+          setAuthError("Invalid email or password. Please try again.");
+        });
+    }
+  };
 
   const switchMode = (m) => {
     setMode(m);

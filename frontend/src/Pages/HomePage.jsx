@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Footer from "../components/Footer";
+import Navbar from "../components/Navbar";
 
 /* ── product data ── */
 const PRODUCTS = [
@@ -92,6 +94,7 @@ export default function HomePage() {
 
   return (
     <main className="bg-[#0D1B2A] min-h-screen pt-[68px] font-['Inter',sans-serif]">
+      <Navbar/>
 
       {/* ════════════════════════════════════
           HERO
@@ -282,6 +285,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      <Footer/>
     </main>
   );
 }

@@ -31,13 +31,14 @@ export async function getProduct(req, res) {
 
 export async function createProduct(req, res){
     try{
-        const {name, description, price, image, category, state} = req.body;
+        const {name, description, price, image, category, stock, state} = req.body;
         const newProduct  = new Product({
             name : name,
             description : description,
             price : price,
             image : image,
             category : category,
+            stock : stock,
             state : state
         });
         const savedProduct = await newProduct.save();
@@ -52,13 +53,14 @@ export async function createProduct(req, res){
 export async function updateProduct(req, res){
     try{
         const id = req.params.id;
-        const {name, description, price, image, category, state} = req.body;
+        const {name, description, price, image, category, stock, state} = req.body;
         const updatedProduct = await Product.findByIdAndUpdate(id, {
             name : name,
             description : description,
             price : price,
             image : image,
             category : category,
+            stock : stock,
             state : state
         }, {new: true});
 
