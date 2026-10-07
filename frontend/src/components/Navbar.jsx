@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 
 const NAV_LINKS = [
   { label: "Home",    to: "/" },
@@ -12,7 +13,8 @@ const NAV_LINKS = [
 export default function Navbar() {
   const location          = useLocation();
   const navigate          = useNavigate();
-  const { user, logout }  = useAuth();          // ← real auth
+  const { user, logout }  = useAuth();
+  const { totalItems }    = useCart();           // ← real cart count
   const [dropOpen, setDropOpen] = useState(false);
   const dropRef = useRef(null);
 
